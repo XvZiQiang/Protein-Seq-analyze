@@ -1,0 +1,55 @@
+# 使用conda安装
+conda install -c hcc aspera-cli
+
+# 测试是否安装成功
+ascp -h
+
+
+
+创建账号
+
+
+
+ascp -d -v -QT -l100m -P 33001 -C 1:16 \
+--file-manifest=text -k 2 -o Overwrite=diff \
+ziqiangxv@download.iprox.org:/IPX0004176000 \
+"/mnt/c/Users/XZQ/Desktop/NCBI/pep-seq-project/plant-science-paper/download-data"
+
+
+① ascp		Aspera 的高速下载指令。
+
+② -d		自动在目标路径中创建目录如果路径不存在，会自动新建。
+
+③ -v		verbose（详细输出）让你看到下载进度与调试信息。
+
+④ -QT		两个参数：
+-Q			关闭进度条/减少输出，通常为了脚本运行更干净。
+-T			关闭加密（不使用 SSH 加密）使用 FASP 协议裸传输 → 速度最快/下载公共数据 不需要加密，非常常用
+
+⑤ -l100m		限速 = 100 MB/s（不是 100 Mbps）m → MB/s如果你带宽够，100 m 是不错的选择
+				Aspera 通常能跑到物理带宽满速（例如 1000 Mbps）
+
+⑥ -P 33001		指定 SSH 认证端口 = 33001	iProX / Aspera 通用端口，不可随意改。
+-C 1:16			16线程下载
+
+⑦ --file-manifest=text	下载过程中生成文件清单
+
+⑧ -k 2			断点续传策略：
+数字			含义
+0				不续传，重新下载
+1				比较大小，不一致就续传
+2				按校验信息续传（最推荐）
+3				总是续传
+
+⑨ -o Overwrite=diff		覆盖规则：只覆盖内容不同的文件（推荐）
+也就是：
+			如果本地文件一致 → 不重下
+			如果大小不同或内容不同 → 自动续传
+			配合 -k 2 非常完美
+			
+⑩ ziqiangxv@download.iprox.org:/IPX0004176000			下载来源（SRC）
+ziqiangxv改成你在iProX里的用户名即可
+IPX0004176000是网站里的项目ID,不是文章里的ID
+
+⑪ "/mnt/c/Users/XZQ/Desktop/NCBI/pep-seq-project/plant-science-paper/download-data"		下载目的地（DEST）
+
